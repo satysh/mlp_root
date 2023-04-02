@@ -6,11 +6,11 @@ void new_mlp() {
    // 1.3, 0.25, 1.5, 1.25
    Int_t n_train = 200;
    Int_t n = 800;
-   Int_t test_n = 200;
-   Double_t E1 = 0.5;
+   Int_t test_n = 100;
+   Double_t E1 = 1.3;
    Double_t E2 = 0.25;
    Double_t D1 = 1.5;
-   Double_t D2 = 0.25;
+   Double_t D2 = 1.25;
 
    TRandom rnd;
 
@@ -54,7 +54,7 @@ void new_mlp() {
    // create ANN
    // kTanh    TMultiLayerPerceptron (const char *layout, TTree *data, TEventList *training, TEventList *test,
    //TNeuron::ENeuronType type=TNeuron::kSigmoid, const char *extF="", const char *extD="")
-   TMultiLayerPerceptron* mlp=new TMultiLayerPerceptron("x0,x1,x2,x3,x4,x5:5:type", tree,
+   TMultiLayerPerceptron* mlp=new TMultiLayerPerceptron("x0,x1,x2,x3,x4,x5:5:5:type", tree,
                                                         "Entry$%2","(Entry$+1)%2"/*, TNeuron::kTanh*/);
 
    mlp->Train(n_train,"text graph update=10");
