@@ -54,7 +54,7 @@ void mlp(Int_t n_train = 100) {
    }
 
    // create ANN
-   TMultiLayerPerceptron* mlp=new TMultiLayerPerceptron("size,length,width,dist:5:5:type", tree,
+   TMultiLayerPerceptron* mlp=new TMultiLayerPerceptron("@size,length,width,dist:5:5:type", tree,
                                                         "Entry$%2","(Entry$+1)%2");
    mlp->Train(n_train,"text graph update=10");
    //tree->StartViewer();
@@ -78,5 +78,6 @@ void mlp(Int_t n_train = 100) {
 
    cIO->cd(3);
    // draws the resulting network
+   // type=1 gamma (signal), type=0 proton (background)
    mlpa->DrawNetwork(0,"type==1","type==0");
 }
