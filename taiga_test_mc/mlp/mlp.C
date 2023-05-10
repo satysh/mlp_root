@@ -3,6 +3,9 @@ void mlp(Int_t n_train = 100) {
    Double_t length = 0.;
    Double_t width = 0.;
    Double_t dist = 0.;
+   Double_t azwidth = 0.;
+   Double_t miss = 0.;
+   Double_t alpha = 0.;
 
    TFile *filegamma = new TFile("../output/hgamma.root", "READ");
    TTree *hgammatree = (TTree*)filegamma->Get("hgamma");
@@ -13,9 +16,9 @@ void mlp(Int_t n_train = 100) {
 
 
    TFile *fileproton = new TFile("../output/hproton.root", "READ");
-   TTree *hprotontree = (TTree*)fileproton->Get("h");
+   TTree *hprotontree = (TTree*)fileproton->Get("hproton");
    if (fileproton->IsZombie() || !hprotontree) {
-      cerr << "Can't read gamma!" << endl;
+      cerr << "Can't read proton!" << endl;
       return;
    }
 
@@ -23,11 +26,17 @@ void mlp(Int_t n_train = 100) {
    hgammatree->SetBranchAddress("length", &length);
    hgammatree->SetBranchAddress("width", &width);
    hgammatree->SetBranchAddress("dist", &dist);
+   hgammatree->Branch("azwidth", &azwidth);
+   hgammatree->Branch("miss", &miss);
+   hgammatree->Branch("alpha", &alpha);
 
    hprotontree->SetBranchAddress("size", &size);
    hprotontree->SetBranchAddress("length", &length);
    hprotontree->SetBranchAddress("width", &width);
    hprotontree->SetBranchAddress("dist", &dist);
+   hprotontree->Branch("azwidth", &azwidth);
+   hprotontree->Branch("miss", &miss);
+   hprotontree->Branch("alpha", &alpha);
 
 
    TFile *file = new TFile("empty.root", "RECREATE");
@@ -37,6 +46,9 @@ void mlp(Int_t n_train = 100) {
    tree->Branch("length", &length, "length/D");
    tree->Branch("width", &width, "width/D");
    tree->Branch("dist", &dist, "dist/D");
+   tree->Branch("azwidth", &azwidth, "azwidth/D");
+   tree->Branch("miss", &miss, "miss/D");
+   tree->Branch("alpha", &alpha, "alpha/D");
 
    Int_t type;
    tree->Branch("type", &type, "type/I");
@@ -54,7 +66,7 @@ void mlp(Int_t n_train = 100) {
    }
 
    // create ANN
-   TMultiLayerPerceptron* mlp=new TMultiLayerPerceptron("@size,length,width,dist:5:5:type", tree,
+   TMultiLayerPerceptron* mlp=new TMultiLayerPerceptron("@size,length,width,dist,azwidth,miss,alpha:7:7:type", tree,
                                                         "Entry$%2","(Entry$+1)%2");
    mlp->Train(n_train,"text graph update=10");
    //tree->StartViewer();
