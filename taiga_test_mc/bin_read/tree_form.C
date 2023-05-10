@@ -1,5 +1,5 @@
 const double rad_to_deg = 180./3.1415926535;
-const double s_pmt = 0.24; // 23.4 [mm]
+const double s_pmt = 4; // 23.4 [mm]
 void tree_form(TString inBinFileName = "", TString outFilePath = "")
 {
   if (inBinFileName == "") {
