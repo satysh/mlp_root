@@ -1,6 +1,6 @@
 void hillas()
 {
-  TString particle = "gamma";
+  TString particle = "proton";
   TFile *file = new TFile("../output/" + particle + ".root");
   if (file->IsZombie()) {
     cerr << "Can't read input file!" << endl;
@@ -76,7 +76,6 @@ void hillas()
     Double_t cxx = curX2No - curXNo*curXNo;
     Double_t cyy = curY2No - curYNo*curYNo;
     Double_t cxy = curXYNo - curXNo*curYNo;
-    Double_t checker = curXNo*curXNo + curYNo*curYNo;
     Double_t d = cyy - cxx;
     Double_t z = TMath::Sqrt(d*d + 4.*cxy*cxy);
     Double_t u = 1. + d/z;
@@ -84,6 +83,7 @@ void hillas()
     miss = 0.5*(u*curXNo*curXNo + v*curYNo*curYNo) - 2.*cxy*curXNo*curYNo/z;
     alpha = asin(miss/dist)*TMath::RadToDeg();
 
+    Double_t checker = curXNo*curXNo + curYNo*curYNo;
     dist = TMath::Sqrt(checker);
     //cout << dist << endl;
     checker = curXNo*curXNo*curY2No - 2.*curXNo*curYNo*curXYNo + curX2No*curYNo*curYNo;
@@ -91,23 +91,10 @@ void hillas()
       azwidth = TMath::Sqrt(checker / dist / dist);
     }
 
-    Double_t aCof = curYNo / curXNo;
-    checker = (cxx + 2.*aCof*cxy + aCof*aCof*cyy) / (1. + aCof*aCof);
-    if (checker < 0) {
-        cerr << "WARNING!!! sqrt(< 0)!!!" << endl;
-        cout << "Event: " << i << endl;
-    }
-    else {
-      length = TMath::Sqrt(checker);
-    }
-    checker = (aCof*aCof*cxx - 2.*aCof*cxy + cyy) / (1. + aCof*aCof);
-    if (checker < 0) {
-      cerr << "WARNING!!! sqrt(< 0)!!!" << endl;
-      cout << "Event: " << i << endl;
-    }
-    else {
-      width = TMath::Sqrt(checker);
-    }
+
+    length = TMath::Sqrt(0.5*(cxx + cyy + z));
+    width = TMath::Sqrt(0.5*(cxx + cyy - z));
+
     outTree->Fill();
   }
 
