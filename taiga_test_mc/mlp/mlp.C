@@ -1,4 +1,4 @@
-void mlp(Int_t n_train = 100) {
+void mlp(Int_t n_train = 50) {
    Int_t size;
    Double_t length = 0.;
    Double_t width = 0.;
@@ -92,4 +92,71 @@ void mlp(Int_t n_train = 100) {
    // draws the resulting network
    // type=1 gamma (signal), type=0 proton (background)
    mlpa->DrawNetwork(0,"type==1","type==0");
+
+   cIO->cd(4);
+   Int_t nbins = 500;
+   Double_t leftboard = -0.5;
+   Double_t rightboard = 1.5;
+   TH1F *bg = new TH1F("bgh", "NN output", nbins, leftboard, rightboard);
+   TH1F *sig = new TH1F("sigh", "NN output", nbins, leftboard, rightboard);
+   bg->SetDirectory(0);
+   sig->SetDirectory(0);
+   Double_t params[7];
+   for (Int_t i = 0; i < hprotontree->GetEntries(); i++) {
+      hprotontree->GetEntry(i);
+      params[0] = size;
+      params[1] = length;
+      params[2] = width;
+      params[3] = dist;
+      params[4] = azwidth;
+      params[5] = miss;
+      params[6] = alpha;
+      bg->Fill(mlp->Evaluate(0, params));
+   }
+   for (Int_t i = 0; i < hgammatree->GetEntries(); i++) {
+      hgammatree->GetEntry(i);
+      params[0] = size;
+      params[1] = length;
+      params[2] = width;
+      params[3] = dist;
+      params[4] = azwidth;
+      params[5] = miss;
+      params[6] = alpha;
+      sig->Fill(mlp->Evaluate(0,params));
+   }
+   bg->SetLineColor(kBlue);
+   bg->SetFillStyle(3008);   bg->SetFillColor(kBlue);
+   sig->SetLineColor(kRed);
+   sig->SetFillStyle(3003); sig->SetFillColor(kRed);
+   bg->SetStats(0);
+   sig->SetStats(0);
+   sig->Draw();
+   bg->Draw("same");
+   TLegend *legend = new TLegend(.75, .80, .95, .95);
+   legend->AddEntry(bg, "Background (proton)");
+   legend->AddEntry(sig, "Signal (gamma)");
+   legend->Draw();
+   cIO->cd(0);
+
+   Double_t alp = 0.05;
+   Double_t betta;
+
+   Double_t sigI_full = sig->Integral(0, nbins, "width");
+   Double_t bgI_full = bg->Integral(0, nbins, "width");
+   cout << sigI_full << ", " << bgI_full << endl;
+
+   Int_t nowbin = -1;
+   Double_t test = alp + 1.;
+   Double_t sigI, bgI;
+   while (test > alp) {
+      nowbin++;
+      sigI = sig->Integral(nowbin, nbins, "width");
+      bgI = bg->Integral(nowbin, nbins, "width");
+      if ((sigI + bgI) == 0.)
+         break;
+      test = bgI / (sigI + bgI);
+   }
+   cout << "board is " << sig->GetBinCenter(nowbin) << endl;
+   cout << "alp=" << alp << endl;
+   cout << "betta=" << (sigI_full - sigI) / (sigI_full - sigI + bgI_full - bgI) << endl;
 }
